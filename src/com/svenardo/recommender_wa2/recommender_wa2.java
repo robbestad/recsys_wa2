@@ -37,6 +37,19 @@ public class recommender_wa2 {
      * the "x + y / x" method described in class. In other words, for each movie, calculate the percentage of people
      * who rated that movie and Star Wars: Episode IV - A New Hope. Order with the highest percentage first, and
      * submit the top 5.
+     *
+     * Amended...:(
+     * Top 5 Star Wars: Calculate movies that most often occur with Star Wars: Episode IV - A New Hope (1977) using
+     * the "x + y / x" method described in class. In other words, for each movie, calculate the percentage of Star Wars
+     * raters who also rated that movie. Order with the highest percentage first, and submit the top 5.
+     *
+     * In order to check your calculations, the values for Raiders of the Lost Ark are:
+
+     Mean: 2.91
+     Rating Count: 11
+     % of 4+: 27.2%
+     Association with Star Wars Episode IV: 50.0%
+
      */
     public static void main(String[] args) {
 
@@ -217,19 +230,24 @@ public class recommender_wa2 {
             int posOne = 0;
             int posTwo = 0;
             boolean createEntry = true;
+            int movieToCompare=1;  // Star Wars is 1
+            int ratedY=0;
+            int ratedX=0;
 
             for (MovieRating ratings : movieRatings) {
 
-                if (ratings.getId() == allMovies.getId() || ratings.getId() == 1) {
+                if (ratings.getId() == allMovies.getId() || ratings.getId() == movieToCompare) {
 
                     if (ratings.getId() == allMovies.getId()) {
                         oneSet = true;
                         posOne = ratings.getPosition();
+                        ratedY++;
                     }
 
                     if (ratings.getId() == 1) {
                         posTwo = ratings.getPosition();
                         twoSet = true;
+                        ratedX++;
                     }
                     ;
 
@@ -244,10 +262,42 @@ public class recommender_wa2 {
 
 
             }
-
+            float simple = (float)ratedBoth /(float)ratedX;
             float percentage = (float) ratedBoth / (float) allMovies.getNumberOfRatings();
 
-            outputMovieList.add(new Rating(allMovies.getMovieId(), percentage, allMovies.getId()));
+            /*
+            The key question we are trying to solve here is how to compute the Star Wars
+            association metric for Raiders movie.
+
+            We have 2 options:
+            Percentage of Star Wars raters who also rated the Raiders movie.
+            Percentage of Raiders raters who also rated the Star Wars movie.
+
+            Association metric for Option #1 is 50%:
+            Number of users who rated StarWars = 16
+            Number of users who rated both StarWars and Raiders = 8
+            Association metric value = 8/16 = 50%
+
+            Association metric for Option #2 is 72.7%:
+            Number of users who rated Raiders = 11
+            Number of users who rated both StarWars and Raiders = 8
+            Association metric value = 8/11 = 72.7%
+
+            Option #1 is aligned with prof. Konstat instructions, according to Paolo's comment.
+            Option #2 is aligned with the value 72.7% provided by the instructors.
+
+            Here:
+
+            var simple = Option #1
+            var percentage = Option #2
+             */
+
+
+            if(allMovies.getMovieId() == 1198){
+                System.out.println("Raiders (should be 50%): "+simple+" "+allMovies.getMovieId()+" "+allMovies.getMovieName());
+
+            }
+            outputMovieList.add(new Rating(allMovies.getMovieId(), simple, allMovies.getId()));
         }
         Collections.sort(outputMovieList, new PercentageSort());
         Collections.reverse(outputMovieList);
@@ -265,6 +315,7 @@ public class recommender_wa2 {
             i++;
         }
         writeFile("deliverable4.txt", data);
+
 
             /*
             System.out.println("id "+allMovies.getMovieName() +
